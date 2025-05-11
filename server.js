@@ -9,7 +9,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Koneksi ke MongoDB
+// Route root untuk ngecek server
+app.get("/", (req, res) => {
+  res.send("✅ Backend is up and running!");
+});
+
+// Koneksi MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -18,7 +23,7 @@ mongoose
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.log("❌ MongoDB Connection Error:", err));
 
-// Model untuk menyimpan data
+// Schema & Model
 const InputData = mongoose.model(
   "InputData",
   new mongoose.Schema({
@@ -26,7 +31,7 @@ const InputData = mongoose.model(
   })
 );
 
-// Endpoint untuk menginput data
+// POST /api/create - simpan data
 app.post("/api/create", async (req, res) => {
   try {
     const { name } = req.body;
@@ -40,19 +45,19 @@ app.post("/api/create", async (req, res) => {
   }
 });
 
-// Endpoint untuk mendapatkan data
+// GET /api/data - ambil semua data
 app.get("/api/data", async (req, res) => {
   try {
     const data = await InputData.find();
-    console.log("📥 Data diambil dari database:", data.length, "item");
+    console.log("📥 Ambil data:", data.length, "item");
     res.json({ success: true, data });
   } catch (err) {
-    console.error("❌ Gagal mengambil data:", err);
+    console.error("❌ Gagal ambil data:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
-  console.log(`🚀 Server running on http://localhost:${port}`);
+  console.log(`🚀 Server running on port ${port}`);
 });
